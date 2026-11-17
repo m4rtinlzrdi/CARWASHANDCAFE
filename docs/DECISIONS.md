@@ -1,0 +1,39 @@
+# Decisions & Assumptions
+
+Decisions follow the attached Master Prompt v5, preserved in [MASTER_PROMPT_v5.md](MASTER_PROMPT_v5.md). “Adopted” means an explicit project requirement/default, not evidence that a feature is implemented. Do not change these without owner approval.
+
+## Recorded decisions
+
+| ID | Decision | Rationale / consequence | Status |
+| --- | --- | --- | --- |
+| D-001 | The complete Master Prompt v5 is the project requirements source of truth. | Keeps the product, security, acceptance, recovery, and deployment rules available across sessions. | Adopted |
+| D-002 | The current repository root is the application root; do not create a nested `asia-cafe/` directory. | This checkout already represents the project and contains no existing application to relocate. | Adopted |
+| D-003 | Target stack: Next.js App Router, TypeScript, Tailwind CSS, Supabase PostgreSQL, Drizzle migrations, Vitest, and Playwright. | Matches the requirements. Exact package versions and the package manager are pinned/recorded in D-012 and `package.json`. | Adopted |
+| D-004 | All data access and privileged Supabase use stay server-side. RLS is enabled with no anonymous data-reading policy; no browser Supabase client. | Keeps the service-role key off the client and makes the Next.js server the access boundary. F1-T02 adds a `server-only` lazy Drizzle/Postgres.js boundary; schema/RLS and connectivity remain future work. | Adopted |
+| D-005 | Customers are always guests. Admin login is for Owner/Staff only; Owner requires TOTP 2FA. | No customer registration, account/profile, or customer login. | Adopted |
+| D-006 | Payment is recorded only after physical payment at the cashier. `KASIR_MODE=disabled` and the KDS fallback are the safe defaults. | No payment gateway, payment SDK, online payment route, or online checkout method may be introduced. Staff-only payment marking is a sensitive action. | Adopted |
+| D-007 | The primary deployment target is a Dockerized VPS; Supabase PostgreSQL remains the database. | Vercel or a database-provider change requires owner approval. Production secrets belong in server/deployment configuration, not Git. | Adopted |
+| D-008 | Use a documented `.env.example` with empty sensitive fields; ignore real `.env` files and never print/store secret values. | F1-T02 validates the server environment lazily with Zod, reports field-level errors without supplied values, defaults cashier mode to `disabled`, and requires complete production settings. Real `.env` files remain ignored. | Adopted |
+| D-009 | Use npm `10.9.8`, pinned in package metadata, with Node `22.22.3` for local development. | npm is available in the sandbox; `.nvmrc` selects the verified runtime, while `engines.node` also permits Node 24+. | Adopted |
+| D-010 | Product descriptions, brand assets, operating facts, and external POS behavior are not invented. | Missing owner inputs stay blank/unconfirmed; cashier integration stays disabled until official documentation and access are provided. | Adopted |
+| D-011 | Store timestamps in UTC and display/report them in `Asia/Jakarta` (WIB). | Keeps persisted ordering consistent while matching cafe-local times. | Adopted |
+| D-012 | Pin the foundation to Next.js `16.4.6`, React/React DOM `19.3.1`, TypeScript `5.9.3`, Tailwind `3.4.19`, ESLint `10.15.0`, TypeScript-ESLint `8.73.0`, Vite `8.3.8`, and Vitest `5.1.0`; all exact versions are in `package.json`/`package-lock.json`. | Registry engine/peer metadata was checked against Node `22.22.3`; all selected ranges accept it. Tailwind 3 preserves the explicit `tailwind.config.ts` requirement. ESLint 10 uses the direct Next plugin, React Hooks plugin, and TypeScript-ESLint rather than the `eslint-config-next` bundle whose transitive React/import/a11y plugins advertised peers only through ESLint 9. | Adopted; clean install, lint, typecheck, test, build, and audit passed |
+| D-013 | Keep the current home route as a clearly labeled scaffold notice, without forms, buttons, mock menu data, or checkout. | The route makes the foundation runnable without suggesting unavailable product functionality. Real customer UX is reserved for Fase 4. | Adopted for F1-T01 |
+| D-014 | Validate server configuration through a pure Zod parser and server-only lazy accessors; create Drizzle/Postgres.js connections only on demand. | Keeps deployment secrets off browser bundles and lets build/tests run without credentials or network connections. Remote database hosts require TLS; `prepare: false` supports Supabase transaction poolers. No connection is made by configuration or client construction itself. | Adopted for F1-T02 |
+
+## Defaults requiring confirmation before go-live
+
+The Master Prompt defines defaults so development can proceed without guessing. These are **not** confirmed cafe facts and must be checked before production: operating hours; exclusive 11% tax/service setting; two unconfirmed seed prices and all other current menu prices; product descriptions; logo and photos; site domain; Owner email/initial credential process; WhatsApp requirement; whether checkout can change location; kitchen release mode; add-on/variant mapping; and cashier API documentation/credentials. See Master Prompt v5 §2 and the go-live checklist in §13/§17.
+
+## Architecture and delivery risks
+
+- Keep authoritative price calculation, discount/tax calculation, snapshots, and idempotency on the server; the browser never supplies totals or payment state.
+- Custom admin authentication is security-sensitive: password hashing, session token hashing/revocation, secure cookie attributes, CSRF protection, lockout/rate limits, Owner TOTP, recovery codes, role authorization, and audit logging need explicit tests.
+- QR/order tokens must be unguessable; locations must be validated server-side. Duplicate checkout requests must not duplicate orders.
+- Polling, rate limiting, and outbox retries must work across production instances; process-memory-only state is not an acceptable production design.
+- Backups, restore, migrations, and application rollback need independent verification; a code rollback must not trigger a destructive database rollback.
+- F1-T01 scaffold and F1-T02 environment/database-access boundary have verification evidence. Database schema/connectivity, authentication, catalog, orders, and deployment controls remain unimplemented; no database connection has been attempted.
+
+## Phase plan
+
+Fase 0 audit and durable documentation → Fase 1 foundation/database/pricing → Fase 2 Owner/Staff auth/admin shell → Fase 3 catalog/promotions/settings → Fase 4 customer experience → Fase 5 order/KDS/cashier payment/reporting → Fase 6 locations/QR → Fase 7 cashier adapter/outbox → Fase 8 integrated verification and VPS deployment. Detailed task sequencing and gates are in [WORK_QUEUE.md](WORK_QUEUE.md). Do not advance tasks/phases without the owner's next instruction.
