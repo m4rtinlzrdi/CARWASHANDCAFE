@@ -5,7 +5,7 @@
 **Current phase:** Fase 1 — **IN PROGRESS**
 **Last completed task:** F1-T02 — **COMPLETED** (environment contract and server-only database boundary)
 **Current branch:** `arena/aef8f2ab-carwashandcafe`
-**Prior checkpoint:** F1-T01 commit `c9c2135`; inspect `git status --short --branch` and `git log -1 --oneline` before resuming.
+**Git checkpoints:** F1-T01 commit `c9c2135`; F1-T02 commit `69219e0`, pushed to open PR #1. Inspect `git status --short --branch` and `git log -1 --oneline` before resuming.
 
 ## Completed in F1-T02
 

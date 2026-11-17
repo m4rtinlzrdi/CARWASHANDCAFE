@@ -26,5 +26,5 @@
 - Validation covers required production settings, URLs/HTTPS, Supabase and Upstash pairs, webhook settings, safe disabled cashier default, forbidden production stub mode, minimum secret lengths, and 12-character production Owner password. Error text reports field/rule only.
 - Updated `.env.example`, README, decisions, known issues, work queue, test report, and handoff. Verified that sensitive template fields are blank and ignored real env files are not tracked.
 - **Tests:** clean `npm ci` PASS; lint PASS; typecheck PASS; unit tests PASS (11 total); production build PASS; npm audit PASS (0 vulnerabilities); environment-template/source-boundary/static browser bundle checks PASS. No DB connection/query was attempted. Details: `docs/TEST_REPORT.md`.
-- **Checkpoint:** F1-T02 is complete on the current branch. Confirm the Git state before making further changes.
+- **Checkpoint:** F1-T02 is committed as `69219e0` and pushed to the current branch, updating open PR #1. Confirm the Git state before making further changes.
 - **Next:** F1-T03 is queued but remains unauthorized. Stop and wait for a new owner instruction.
