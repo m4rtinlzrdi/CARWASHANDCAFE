@@ -3,55 +3,55 @@
 **Project:** ASIA Car Wash & Cafe
 **Updated:** 2026-11-17 (UTC)
 **Current phase:** Fase 1 — **IN PROGRESS**
-**Last task:** F1-T01 — **COMPLETED** (toolchain and runnable scaffold)
+**Last completed task:** F1-T02 — **COMPLETED** (environment contract and server-only database boundary)
 **Current branch:** `arena/aef8f2ab-carwashandcafe`
-**Git checkpoint:** F1-T01 changes are on the current branch; inspect `git status --short` and `git log -1 --oneline` before resuming.
+**Prior checkpoint:** F1-T01 commit `c9c2135`; inspect `git status --short --branch` and `git log -1 --oneline` before resuming.
 
-## Completed in this task
+## Completed in F1-T02
 
-- Selected and pinned Node/npm and the Next.js/React/TypeScript/Tailwind/ESLint/Vite/Vitest toolchain after checking registry engine/peer metadata.
-- Added a minimal Next.js App Router scaffold with an explicit Indonesian “not available yet” notice. It has no mock menu data, forms, buttons, checkout, or admin feature.
-- Added baseline lint, typecheck, unit-test, build, and host-bound dev-server scripts. Added one smoke test for the scaffold route.
-- Verified a clean install, all four quality commands, zero current npm audit findings, emitted Tailwind CSS, and an HTTP 200 from the live dev server.
-- Resolved the initial ESLint peer incompatibility/audit findings and Vite 8 JSX-config/test failure. Details are in `docs/TEST_REPORT.md`.
+- Pinned Zod `4.6.7`, Drizzle ORM `0.45.4`, postgres.js `3.4.9`, and `server-only` `0.0.1`.
+- Added pure Zod environment parsing with safe `KASIR_MODE=disabled` default, URL/protocol checks, production requirements, paired Supabase/Upstash settings, conditional cashier webhook settings, and secret-safe field errors. Production initial Owner passwords must be at least 12 characters; session, TOTP, cron, and cashier webhook secrets (when configured) must be at least 32 characters.
+- Added lazy server-only environment access and lazy Drizzle/Postgres.js client construction. Remote database hosts require TLS; `prepare: false` supports transaction poolers. No browser Supabase client was added.
+- Updated `.env.example`, README, decisions, known issues, queue, and verification report. Real `.env` files remain ignored; the example's sensitive fields are blank.
+- No database connection or query was attempted: no safe credentials were provided. Database schema and migrations remain F1-T03.
 
-## Files created/updated
+## Files created or updated for F1-T02
 
-- Toolchain: `package.json`, `package-lock.json`, `.nvmrc`, `.npmrc`, `.gitignore`
-- Next/TypeScript/Tailwind: `next.config.ts`, `next-env.d.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.mjs`
-- Lint/test: `eslint.config.mjs`, `vitest.config.mts`, `tests/unit/home-page.test.tsx`
-- App: `app/layout.tsx`, `app/page.tsx`, `app/globals.css`
-- Docs: `README.md`, `docs/WORK_QUEUE.md`, `docs/DECISIONS.md`, `docs/KNOWN_ISSUES.md`, `docs/REPOSITORY_AUDIT.md`, `docs/TEST_REPORT.md`, `docs/SESSION_LOG.md`, this handoff
+- `package.json`, `package-lock.json`
+- `lib/env-schema.ts`, `lib/env.ts`, `server/db/client.ts`
+- `tests/unit/env.test.ts`
+- `.env.example`, `README.md`
+- `docs/WORK_QUEUE.md`, `docs/DECISIONS.md`, `docs/KNOWN_ISSUES.md`, `docs/TEST_REPORT.md`, this handoff, and `docs/SESSION_LOG.md`
 
-## Tests and open risks
+## Verification
 
-- `npm ci`: PASS.
+- `npm ci --registry=https://registry.npmjs.org`: PASS.
 - `npm run lint`: PASS.
 - `npm run typecheck`: PASS.
-- `npm test`: PASS (1 test).
+- `npm test`: PASS (11 tests total: 10 environment tests and 1 scaffold smoke test).
 - `npm run build`: PASS.
 - `npm audit --audit-level=moderate --registry=https://registry.npmjs.org`: PASS (0 vulnerabilities).
-- Dev server: running on `0.0.0.0:3000`; smoke request returned HTTP 200. The page is only a scaffold notice.
-- Supabase, schema/migrations, Docker, Playwright E2E, real device, and production checks remain unavailable or are queued for later tasks.
-- `npm ls --depth=0` prints an extraneous diagnostic for Next's optional Sharp WASM support; `npm explain sharp` traces it to Next's optional dependency. Build and audit pass; see `docs/KNOWN_ISSUES.md`.
+- Environment template/ignore and source-boundary checks: PASS; only `.env.example` is tracked, its secret fields are blank, no browser Supabase SDK exists, and no server-secret names were found in `.next/static`.
+- Database connection: NOT RUN. See `docs/TEST_REPORT.md` for the detailed evidence and limitations.
 
-## Decisions
+## Current limits and project constraints
 
-See `docs/DECISIONS.md`, especially D-012 for exact toolchain versions. No online payment, customer accounts, fake business data, database access, or undocumented cashier behavior was introduced.
+- The home page remains a scaffold notice. Catalog, schema/migrations, seed, authentication, ordering, admin/KDS, cashier payment marking, reporting, QR lifecycle, and POS integration are not implemented.
+- No real secret values should be read into chat, committed, logged, or bundled into browser code. Do not attempt a database connection without safe non-production credentials.
+- Preserve cashier-only payment, guest-only ordering, exactly two customer navigation tabs (Beranda and Menu), Owner/Staff-only admin login, mandatory Owner 2FA, and no online payment gateway/route.
+- `KASIR_MODE` stays `disabled` unless official cashier API documentation and safe credentials are supplied.
 
 ## Next task — wait for owner authorization
 
-**Next task:** F1-T02 — Validate the environment contract and add the server-only database access boundary. It depends on this toolchain task.
-
-The instruction **“terus bekerja”** authorized F1-T01 only. Do not start F1-T02, connect to Supabase, or advance to later tasks until the owner gives a new continuation instruction.
+**Next queued task:** F1-T03 — Create the versioned Drizzle schema and migrations. F1-T02 is complete; the owner's `lanjutkan` instruction authorized F1-T02 only. **Do not start F1-T03 until the owner gives another instruction.**
 
 ## Do not repeat or change
 
-- Do not redo F1-T01 unless a regression is demonstrated; inspect current Git status/diff first.
-- Do not claim the scaffold is a functioning menu/order/admin system.
-- Do not add a payment gateway, online payment route, customer auth/account, invented business data, or undocumented cashier integration.
-- Never put real secrets in Git, logs, frontend code, or chat. Do not print secret values during future environment audits.
+- Do not redo F1-T01/F1-T02 unless a regression is demonstrated; inspect Git status/diff first.
+- Do not claim the scaffold is a functioning menu/order/admin system or claim database connectivity.
+- Do not add a payment gateway, online payment route, customer account/auth flow, invented business data, or undocumented cashier behavior.
+- Do not reset/migrate a real database or expose secrets.
 
 ## Continuation prompt
 
-> Lanjutkan proyek ASIA Car Wash & Cafe sesuai `docs/MASTER_PROMPT_v5.md` dan kondisi repository saat ini. Baca `docs/AI_HANDOFF.md`, `docs/WORK_QUEUE.md`, `docs/DECISIONS.md`, serta `docs/TEST_REPORT.md`. Periksa `git status` dan diff. Fase 0 dan F1-T01 sudah selesai; jangan mengulangnya. Tunggu instruksi owner sebelum memulai F1-T02. Setelah diizinkan, kerjakan hanya F1-T02, jalankan tes relevan, perbarui handoff/work queue/laporan, lalu berhenti.
+> Continue ASIA Car Wash & Cafe according to `docs/MASTER_PROMPT_v5.md` and the repository state. Read `docs/AI_HANDOFF.md`, `docs/WORK_QUEUE.md`, `docs/DECISIONS.md`, and `docs/TEST_REPORT.md`; inspect `git status` and the diff. Fase 0, F1-T01, and F1-T02 are complete. Do not start F1-T03 or any later task until the owner gives a new authorization. Keep the handoff and test report accurate, and never connect to a database without safe non-production credentials.

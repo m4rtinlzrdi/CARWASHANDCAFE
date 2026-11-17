@@ -4,8 +4,9 @@ Source requirements: [`MASTER_PROMPT_v5.md`](MASTER_PROMPT_v5.md). Status is `TO
 
 **Current branch:** `arena/aef8f2ab-carwashandcafe`
 **Current phase:** Fase 1 — IN PROGRESS
-**Last completed task:** F1-T01 — Bootstrap and pin the application toolchain.
-**Next queued task:** F1-T02 remains TODO; wait for a new owner instruction before starting it.
+**Last completed task:** F1-T02 — Validate the environment contract and add server-only database access.
+**Next queued task:** F1-T03 — Create the versioned Drizzle schema and migrations.
+**Authorization:** The owner authorized F1-T02 only. Stop here; do not begin F1-T03 until the owner gives another instruction.
 
 ## Fase 0 — Pre-development audit & plan — COMPLETED
 
@@ -43,12 +44,12 @@ Source requirements: [`MASTER_PROMPT_v5.md`](MASTER_PROMPT_v5.md). Status is `TO
 - **Risk:** Verify exact dependency engine requirements; Node `v22.22.3` and npm `10.9.8` are only the observed sandbox versions.
 
 ### F1-T02 — Validate environment contract and server-only database access
-- **Status:** TODO
+- **Status:** COMPLETED
 - **Goal:** Add Zod validation for required/optional environment values and a server-only Supabase/PostgreSQL connection boundary.
 - **Prerequisites:** F1-T01.
-- **Likely files:** `lib/env.ts`, database client/config, `.env.example`, unit tests.
-- **Acceptance:** Invalid/missing production configuration fails clearly; secrets never enter client bundles/logs; no browser Supabase client; `KASIR_MODE` defaults to `disabled`.
-- **Risk:** Actual connection tests wait for safe non-production credentials.
+- **Files:** `lib/env-schema.ts`, `lib/env.ts`, `server/db/client.ts`, `.env.example`, `tests/unit/env.test.ts`, environment documentation.
+- **Acceptance:** Production requirements, URL schemes, paired service settings, webhook configuration, and minimum secret/password lengths are validated; errors report fields without supplied values; browser bundle contains no server-secret names; no browser Supabase client; `KASIR_MODE` defaults to `disabled`. Lint, typecheck, 11 unit tests, production build, and npm audit pass.
+- **Risk / limitation:** Actual database connection tests were not run because credentials are absent; no connection was attempted. Schema/migrations remain F1-T03.
 
 ### F1-T03 — Create versioned Drizzle schema and migrations
 - **Status:** TODO

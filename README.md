@@ -2,7 +2,7 @@
 
 A guest-first digital menu and ordering system for ASIA Car Wash & Cafe, with a separate Owner/Staff admin and kitchen display. Customers order as guests and pay only at the physical cashier; there is no online payment flow.
 
-> **Project status:** Phase 1 foundation is in progress. The repository now has a runnable Next.js scaffold, but catalog, database, authentication, ordering, and admin features are not implemented yet.
+> **Project status:** Phase 1 foundation is in progress. The repository has a runnable Next.js scaffold and a server-only, lazy database access boundary; catalog, database schema/migrations, authentication, ordering, and admin features are not implemented yet.
 
 ## Project source of truth
 
@@ -26,7 +26,9 @@ npm ci
 npm run dev
 ```
 
-The current home page is explicitly a scaffold notice; no ordering or admin action is available yet. No environment file or external service is required to run this scaffold. Environment validation and database access will be added in a later Phase 1 task.
+The current home page is explicitly a scaffold notice; no ordering or admin action is available yet. The environment contract is validated lazily on the server, and database access is available only through the server-only Drizzle client. The scaffold and its tests do not require a database connection or real credentials; schema and migrations are a later Phase 1 task.
+
+To prepare local configuration for future server features, copy `.env.example` to `.env.local` and fill only the values needed for the task. Production requires the documented server-side variables, strong secrets, and HTTPS service URLs. `KASIR_MODE` defaults to `disabled`; do not enable webhook mode without the cafe's official API documentation and credentials.
 
 ## Quality checks
 
@@ -37,4 +39,4 @@ npm test
 npm run build
 ```
 
-`.env.example` documents the expected future environment-variable names with sensitive fields blank and cashier integration disabled. Keep actual credentials in a local ignored environment file or deployment environment, never in Git, frontend code, logs, or chat.
+`.env.example` documents the validated environment contract with sensitive fields blank and cashier integration disabled. Keep actual credentials in a local ignored environment file or deployment environment, never in Git, frontend code, logs, or chat. `SUPABASE_SERVICE_ROLE_KEY`, database credentials, and other secrets must remain in server-only code paths; no browser Supabase client is provided.
