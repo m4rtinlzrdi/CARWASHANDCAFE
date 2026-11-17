@@ -28,3 +28,13 @@
 - **Tests:** clean `npm ci` PASS; lint PASS; typecheck PASS; unit tests PASS (11 total); production build PASS; npm audit PASS (0 vulnerabilities); environment-template/source-boundary/static browser bundle checks PASS. No DB connection/query was attempted. Details: `docs/TEST_REPORT.md`.
 - **Checkpoint:** F1-T02 is committed as `69219e0` and pushed to the current branch, updating open PR #1. Confirm the Git state before making further changes.
 - **Next:** F1-T03 is queued but remains unauthorized. Stop and wait for a new owner instruction.
+
+## 2026-11-17 — F1-T03 — Versioned Drizzle schema and migrations
+
+- PR #1 was merged at `9ee9401`; the prior F1-T03 changes had not been committed into that PR. Resumed on the new, clean active branch `arena/a1b6bb37-carwashandcafe`, based on the merge commit, without switching branches or overwriting local work.
+- The owner said `lanjutkann`, authorizing F1-T03 only. Recreated the schema/migration work on this branch from Master Prompt v5 §10; no database credentials were inspected and no connection was attempted.
+- Added Drizzle Kit `0.31.11`, `@next/env` `16.4.6`, migration scripts/config, the typed database client, a 23-table/14-enum schema, two journaled migrations, RLS on all tables with no anon/authenticated policies, and custom timestamp/audit/promotion-target triggers. No seed data was added.
+- **Tests:** clean `npm ci` PASS; Drizzle generation/no-drift/check PASS; lint PASS; typecheck PASS; 14 unit tests PASS; production build PASS; `git diff --check` PASS. Migration execution was not run; the migrations remain unapplied.
+- **Audit:** full `npm audit` reports 19 high dev-toolchain advisories; `npm audit --omit=dev` reports 0. An esbuild override avoids the deprecated Drizzle loader's moderate advisory but is outside its declared `~0.18.20` range; broader compatibility is unverified. See K-008 and D-016.
+- **Checkpoint:** F1-T03 is complete on the active branch; verify the current Git history/status before continuing.
+- **Next:** F1-T04 is queued but remains unauthorized. Stop and wait for a new owner instruction.

@@ -2,11 +2,11 @@
 
 Source requirements: [`MASTER_PROMPT_v5.md`](MASTER_PROMPT_v5.md). Status is `TODO`, `IN PROGRESS`, `COMPLETED`, or `BLOCKED`. A phase/task marked `TODO` is not authorization to start it.
 
-**Current branch:** `arena/aef8f2ab-carwashandcafe`
+**Current branch:** `arena/a1b6bb37-carwashandcafe`
 **Current phase:** Fase 1 — IN PROGRESS
-**Last completed task:** F1-T02 — Validate the environment contract and add server-only database access.
-**Next queued task:** F1-T03 — Create the versioned Drizzle schema and migrations.
-**Authorization:** The owner authorized F1-T02 only. Stop here; do not begin F1-T03 until the owner gives another instruction.
+**Last completed task:** F1-T03 — Create the versioned Drizzle schema and migrations.
+**Next queued task:** F1-T04 — Implement idempotent initial seed and integrity checks.
+**Authorization:** The owner's `lanjutkann` instruction authorized F1-T03 only. Stop here; do not begin F1-T04 until the owner gives another instruction.
 
 ## Fase 0 — Pre-development audit & plan — COMPLETED
 
@@ -52,12 +52,12 @@ Source requirements: [`MASTER_PROMPT_v5.md`](MASTER_PROMPT_v5.md). Status is `TO
 - **Risk / limitation:** Actual database connection tests were not run because credentials are absent; no connection was attempted. Schema/migrations remain F1-T03.
 
 ### F1-T03 — Create versioned Drizzle schema and migrations
-- **Status:** TODO
+- **Status:** COMPLETED
 - **Goal:** Model the required catalog, settings, admin/session, location/QR, order/item, payment-record, audit, request, and cashier-outbox data with constraints and indexes from the spec.
 - **Prerequisites:** F1-T01 and F1-T02; schema review before migration execution.
-- **Likely files:** `db/schema/`, `db/migrations/`, Drizzle config, schema tests/docs.
-- **Acceptance:** Migrations are versioned, deterministic, non-destructive, and coherent with the documented relations; no production database reset or hidden alternate migration mechanism.
-- **Risk:** Price snapshots, token uniqueness, idempotency, RLS, and enum/state design affect later phases; do not mix Drizzle with a competing migration mechanism.
+- **Files:** `db/schema/`, `db/migrations/`, `drizzle.config.ts`, typed `server/db/client.ts`, `tests/unit/db-schema.test.ts`, `docs/DB_SCHEMA.md`.
+- **Acceptance:** 23-table schema and two versioned migrations generated; 14 PostgreSQL enums; RLS enabled without anon/authenticated policies; required order/history constraints and indexes; no seed or customer/payment-gateway tables. Final Drizzle generation reports no schema drift; `drizzle-kit check`, lint, typecheck, 14 unit tests, and production build pass.
+- **Risk / limitation:** Migrations remain unapplied; no database connection was attempted because no safe credentials were provided. Full `npm audit` reports 19 high dev-toolchain advisories (K-008); production-only audit reports zero. Do not start F1-T04 without new owner authorization.
 
 ### F1-T04 — Implement idempotent initial seed and integrity checks
 - **Status:** TODO

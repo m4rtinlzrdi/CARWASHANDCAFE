@@ -2,7 +2,7 @@
 
 **Audit date:** 2026-11-17 (UTC)
 **Phase:** 0 — pre-development audit
-**Branch:** `arena/aef8f2ab-carwashandcafe`
+**Baseline branch:** `arena/aef8f2ab-carwashandcafe` (original Phase 0 audit; later work continues on the active branch recorded in `docs/WORK_QUEUE.md`).
 **Starting commit:** `c8473ea65bdc695476293c654c2e523b0dcba7df` (`Initial commit`)
 
 ## Initial repository state
@@ -65,6 +65,6 @@ Proceed in the dependency order recorded in [WORK_QUEUE.md](WORK_QUEUE.md): esta
 
 See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for pending access and go-live inputs, and [DECISIONS.md](DECISIONS.md) for adopted defaults and open decisions.
 
-## F1-T01 follow-up (2026-11-17)
+## Phase 1 follow-up (2026-11-17)
 
-The inventory above is the pre-development baseline, not the current repository state. After the owner authorized continuation with “terus bekerja,” F1-T01 added and verified a pinned Next.js/React/TypeScript/Tailwind toolchain and a clearly non-functional app scaffold. See [TEST_REPORT.md](TEST_REPORT.md) and [WORK_QUEUE.md](WORK_QUEUE.md) for versions and evidence. F1-T02 and database-dependent checks remain pending; no Supabase connection has been attempted.
+The inventory above is the pre-development baseline, not the current repository state. F1-T01 added and verified the pinned Next.js/React/TypeScript/Tailwind toolchain and scaffold; F1-T02 added the validated server-only database boundary; F1-T03 added the 23-table Drizzle schema and two versioned migrations. PR #1 was merged at `9ee9401bea860c00e783c4de2adc30017af318c8`; the current continuation branch is recorded in `docs/WORK_QUEUE.md`. The migrations remain unapplied, no seed was added, and no Supabase/database connection was attempted. See [TEST_REPORT.md](TEST_REPORT.md) and [WORK_QUEUE.md](WORK_QUEUE.md) for evidence and limitations.

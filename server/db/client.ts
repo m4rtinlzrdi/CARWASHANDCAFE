@@ -3,10 +3,11 @@ import "server-only";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres, { type Sql } from "postgres";
 import { getServerEnv } from "@/lib/env";
+import { schema } from "@/db/schema";
 
 type DatabaseGlobal = typeof globalThis & {
   __asiaPostgresClient?: Sql;
-  __asiaDrizzleDatabase?: PostgresJsDatabase;
+  __asiaDrizzleDatabase?: PostgresJsDatabase<typeof schema>;
 };
 
 const globalForDatabase = globalThis as DatabaseGlobal;
@@ -17,7 +18,7 @@ const globalForDatabase = globalThis as DatabaseGlobal;
  * unencrypted for development. `prepare: false` supports
  * Supabase transaction poolers.
  */
-export function getDb(): PostgresJsDatabase {
+export function getDb(): PostgresJsDatabase<typeof schema> {
   const { DATABASE_URL, NODE_ENV } = getServerEnv();
 
   if (!DATABASE_URL) {
@@ -40,6 +41,7 @@ export function getDb(): PostgresJsDatabase {
   if (!globalForDatabase.__asiaDrizzleDatabase) {
     globalForDatabase.__asiaDrizzleDatabase = drizzle(
       globalForDatabase.__asiaPostgresClient,
+      { schema },
     );
   }
 

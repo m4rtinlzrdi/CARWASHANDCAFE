@@ -2,7 +2,7 @@
 
 A guest-first digital menu and ordering system for ASIA Car Wash & Cafe, with a separate Owner/Staff admin and kitchen display. Customers order as guests and pay only at the physical cashier; there is no online payment flow.
 
-> **Project status:** Phase 1 foundation is in progress. The repository has a runnable Next.js scaffold and a server-only, lazy database access boundary; catalog, database schema/migrations, authentication, ordering, and admin features are not implemented yet.
+> **Project status:** Phase 1 foundation is in progress. The repository has a runnable Next.js scaffold, a server-only typed database access boundary, and versioned schema migrations. The migrations have not been applied; seed data, catalog UI, authentication, ordering, and admin features are not implemented yet.
 
 ## Project source of truth
 
@@ -10,6 +10,7 @@ A guest-first digital menu and ordering system for ASIA Car Wash & Cafe, with a 
 - [Work queue](docs/WORK_QUEUE.md) — phased tasks and current statuses.
 - [AI handoff](docs/AI_HANDOFF.md) — current task and exact next step.
 - [Decisions](docs/DECISIONS.md) and [repository audit](docs/REPOSITORY_AUDIT.md) — recorded assumptions and starting baseline.
+- [Database schema](docs/DB_SCHEMA.md) and [test report](docs/TEST_REPORT.md) — schema decisions, migration safety, verification, and limitations.
 
 The repository root is the application root; do not create a second nested `asia-cafe/` project directory.
 
@@ -26,7 +27,7 @@ npm ci
 npm run dev
 ```
 
-The current home page is explicitly a scaffold notice; no ordering or admin action is available yet. The environment contract is validated lazily on the server, and database access is available only through the server-only Drizzle client. The scaffold and its tests do not require a database connection or real credentials; schema and migrations are a later Phase 1 task.
+The current home page is explicitly a scaffold notice; no ordering or admin action is available yet. The environment contract is validated lazily on the server, and database access is available only through the server-only Drizzle client. The scaffold and tests do not require a database connection or real credentials. The checked-in schema and migrations are generated but unapplied; review them before using `npm run db:migrate`, and only apply them to an explicitly approved non-production database.
 
 To prepare local configuration for future server features, copy `.env.example` to `.env.local` and fill only the values needed for the task. Production requires the documented server-side variables, strong secrets, and HTTPS service URLs. `KASIR_MODE` defaults to `disabled`; do not enable webhook mode without the cafe's official API documentation and credentials.
 
@@ -37,6 +38,8 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+npm run db:generate
+npx drizzle-kit check
 ```
 
 `.env.example` documents the validated environment contract with sensitive fields blank and cashier integration disabled. Keep actual credentials in a local ignored environment file or deployment environment, never in Git, frontend code, logs, or chat. `SUPABASE_SERVICE_ROLE_KEY`, database credentials, and other secrets must remain in server-only code paths; no browser Supabase client is provided.
