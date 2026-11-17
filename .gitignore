@@ -11,6 +11,9 @@ dist/
 build/
 coverage/
 .turbo/
+*.tsbuildinfo
+.eslintcache
+.vitest/
 playwright-report/
 test-results/
 

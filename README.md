@@ -2,21 +2,39 @@
 
 A guest-first digital menu and ordering system for ASIA Car Wash & Cafe, with a separate Owner/Staff admin and kitchen display. Customers order as guests and pay only at the physical cashier; there is no online payment flow.
 
-> **Project status:** Phase 0 (pre-development audit) is complete. This repository does not yet contain a runnable application.
+> **Project status:** Phase 1 foundation is in progress. The repository now has a runnable Next.js scaffold, but catalog, database, authentication, ordering, and admin features are not implemented yet.
 
 ## Project source of truth
 
-- [Master Prompt v5](docs/MASTER_PROMPT_v5.md) — complete product, business, security, workflow, and acceptance requirements.
+- [Master Prompt v5](docs/MASTER_PROMPT_v5.md) — product, business, security, workflow, and acceptance requirements.
 - [Work queue](docs/WORK_QUEUE.md) — phased tasks and current statuses.
-- [AI handoff](docs/AI_HANDOFF.md) — current task and the exact next step.
-- [Decisions](docs/DECISIONS.md) and [repository audit](docs/REPOSITORY_AUDIT.md) — recorded baseline and assumptions.
+- [AI handoff](docs/AI_HANDOFF.md) — current task and exact next step.
+- [Decisions](docs/DECISIONS.md) and [repository audit](docs/REPOSITORY_AUDIT.md) — recorded assumptions and starting baseline.
 
 The repository root is the application root; do not create a second nested `asia-cafe/` project directory.
 
-## Target architecture
+## Toolchain
 
-Next.js App Router, TypeScript, and Tailwind CSS; Supabase PostgreSQL with versioned Drizzle migrations; server-only data access; custom Owner/Staff authentication; and VPS + Docker deployment. The cashier integration is disabled by default, with KDS as the fallback.
+- Node.js `22.22.3` (see `.nvmrc`; `package.json` declares supported engine ranges).
+- npm `10.9.8` (pinned in `package.json`).
+- Next.js App Router, React, TypeScript, Tailwind CSS, ESLint, and Vitest versions are pinned in `package.json` and `package-lock.json`.
 
-## Development setup
+## Local development
 
-Setup instructions and runnable commands will be added in Phase 1 after the project toolchain and dependency versions are selected. `.env.example` documents the expected environment-variable names with no real credentials. Keep actual secrets in a local ignored environment file or the deployment environment, never in Git.
+```bash
+npm ci
+npm run dev
+```
+
+The current home page is explicitly a scaffold notice; no ordering or admin action is available yet. No environment file or external service is required to run this scaffold. Environment validation and database access will be added in a later Phase 1 task.
+
+## Quality checks
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+`.env.example` documents the expected future environment-variable names with sensitive fields blank and cashier integration disabled. Keep actual credentials in a local ignored environment file or deployment environment, never in Git, frontend code, logs, or chat.

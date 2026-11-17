@@ -3,8 +3,9 @@
 Source requirements: [`MASTER_PROMPT_v5.md`](MASTER_PROMPT_v5.md). Status is `TODO`, `IN PROGRESS`, `COMPLETED`, or `BLOCKED`. A phase/task marked `TODO` is not authorization to start it.
 
 **Current branch:** `arena/aef8f2ab-carwashandcafe`
-**Current phase:** Fase 0 — completed
-**Next authorized work:** none until the owner says `lanjut`. The next task would be F1-T01.
+**Current phase:** Fase 1 — IN PROGRESS
+**Last completed task:** F1-T01 — Bootstrap and pin the application toolchain.
+**Next queued task:** F1-T02 remains TODO; wait for a new owner instruction before starting it.
 
 ## Fase 0 — Pre-development audit & plan — COMPLETED
 
@@ -31,10 +32,10 @@ Source requirements: [`MASTER_PROMPT_v5.md`](MASTER_PROMPT_v5.md). Status is `TO
 - **Likely files:** `docs/WORK_QUEUE.md`, `docs/AI_HANDOFF.md`, `docs/SESSION_LOG.md`, `docs/TEST_REPORT.md`.
 - **Acceptance:** Phase/task statuses, prerequisites, likely files, acceptance checks, risks, next task, and “wait for `lanjut`” instruction are recorded.
 
-## Fase 1 — Foundation & database — TODO (not started)
+## Fase 1 — Foundation & database — IN PROGRESS
 
 ### F1-T01 — Bootstrap and pin the application toolchain
-- **Status:** TODO
+- **Status:** COMPLETED
 - **Goal:** Create the Next.js App Router + TypeScript + Tailwind foundation, select/pin Node/package-manager/dependency versions, and establish lint/typecheck/test/build scripts.
 - **Prerequisites:** Owner says `lanjut`; Fase 0 complete.
 - **Likely files:** `package.json`, lockfile, Next/TypeScript/Tailwind configs, `app/`, `tests/`, `.gitignore`.

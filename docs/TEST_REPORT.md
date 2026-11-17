@@ -1,33 +1,60 @@
 # Test & Verification Report
 
 **Date:** 2026-11-17 (UTC)
-**Scope:** Fase 0 repository/environment audit and documentation only
+**Scope:** Fase 0 audit and F1-T01 toolchain/scaffold only
 **Environment:** Linux x86_64; Node.js `v22.22.3`; npm `10.9.8`
 
-## Baseline before project bootstrap
+## Starting baseline (before any project implementation)
 
 | Check | Result | Evidence / limitation |
 | --- | --- | --- |
 | Branch and clean starting tree | PASS | `git status --short --branch`; active branch was `arena/aef8f2ab-carwashandcafe` and the starting tree was clean. |
 | Starting commit / tracked files | PASS | `git log --oneline -8`, `git rev-parse --short HEAD`, and `git ls-files`; base was `c8473ea` with one tracked file (`README.md`). |
-| Repository structure and project manifests | PASS (audit) | `find` and manifest checks found no app, package/lockfile, test/build config, migrations, or assets. |
-| Runtime/tool availability | PASS (audit) | Version/presence checks: Node, npm, Yarn, Corepack, Docker, Compose, `psql`, Supabase CLI. |
+| Repository structure and project manifests | PASS (audit) | Initial `find` and manifest checks found no app, package/lockfile, test/build config, migrations, or assets. |
 | Environment variable presence | PASS (audit) | Checked required variable names only; all were absent. No values were printed. No `.env` file existed. |
-| Supabase connectivity/migration status | NOT RUN | No credentials/configuration or local client were available; there is no migration to inspect. |
-| Lint / typecheck / unit tests / E2E / production build | NOT RUN — not applicable at baseline | No `package.json`, scripts, source code, or test configuration exists. No success is claimed. |
-| Docker image / compose verification | NOT RUN — not applicable at baseline | Docker is unavailable and no Docker configuration exists. |
+| Supabase connectivity/migration status | NOT RUN | No credentials/configuration or local client were available; there was no migration to inspect. |
+| Docker image / compose verification | NOT RUN | Docker was unavailable and no Docker configuration existed at baseline. |
 
-## Phase 0 documentation checks
+## F1-T01 — Toolchain compatibility and pinned versions
+
+Registry metadata was checked directly with `npm view ... --registry=https://registry.npmjs.org`; all direct dependencies are exact-pinned in `package.json` and locked in `package-lock.json`.
+
+| Component | Pinned version | Compatibility check |
+| --- | --- | --- |
+| Node.js / npm | Node `22.22.3`; npm `10.9.8` | `.nvmrc`, `packageManager`, and `engines.node` declare the local/runtime baseline; Node 24+ is also permitted by the engine range. |
+| Next.js / React | Next `16.4.6`; React and React DOM `19.3.1` | Next requires Node `>=20.9.0` and accepts React `^19.0.0`; the installed runtime and versions meet those ranges. |
+| Tailwind CSS | `3.4.19` | Chosen to honor the project requirement for a typed `tailwind.config.ts`; configuration and compiled utility CSS were verified by build. |
+| TypeScript | `5.9.3` | Node engine accepts the runtime; satisfies the selected TypeScript-ESLint peer range. Next's build updated `jsx` to `react-jsx` and passed TypeScript validation. |
+| ESLint stack | ESLint `10.15.0`; Next plugin `16.4.6`; React Hooks plugin `7.1.1`; TypeScript-ESLint `8.73.0` | Selected plugins advertise ESLint 10 compatibility; Node 22.22.3 satisfies ESLint's `^22.13.0` engine range. |
+| Unit-test stack | Vite `8.3.8`; Vitest `5.1.0` | Vite requires Node `^20.19.0 || >=22.12.0`; Vitest requires `^22.12.0 || ^24.0.0 || >=26.0.0`; installed Node 22.22.3 satisfies both. |
+
+## F1-T01 checks
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| Required `.env.example` variable names | PASS | Checked all 16 variable names from Master Prompt §11. Sensitive placeholders are blank; `KASIR_MODE=disabled`; no payment-gateway variables are present. |
-| Secret-file ignore behavior | PASS | `git check-ignore -q .env.local` confirms local env files are ignored; `.env.example` is not ignored. |
-| Master Prompt reference | PASS | Compared the persisted reference to the attachment; content matches after normalizing its redundant final blank line. |
-| Handoff docs and relative Markdown links | PASS | Required docs exist and are non-empty; scripted relative-link check passed. |
-| Text hygiene | PASS | UTF-8/trailing-whitespace/NUL check passed for 11 project text files. |
-| Git whitespace validation | PASS | `git diff --check` passed after all documentation and environment-template changes. |
+| Clean dependency install | PASS | `npm ci --registry=https://registry.npmjs.org` completed with the pinned lockfile and no peer-resolution warnings. |
+| Lint | PASS | `npm run lint` (`eslint .`). |
+| Typecheck | PASS | `npm run typecheck` (`tsc --noEmit`). |
+| Unit test | PASS | `npm test`; 1 scaffold route smoke test passed. |
+| Production build | PASS | `npm run build`; Next.js `16.4.6` compiled and statically generated `/` and `/_not-found`. |
+| Dependency audit | PASS | `npm audit --audit-level=moderate --registry=https://registry.npmjs.org`; 0 vulnerabilities. |
+| Tailwind build integration | PASS | Generated CSS contains the scaffold utilities `.min-h-screen` and `.max-w-4xl`. |
+| Development server smoke test | PASS | `npm run dev` bound to `0.0.0.0:3000`; sandbox request returned HTTP 200, Indonesian scaffold content, and no form/button. Preview server remains running. |
+| Payment-gateway dependency check | PASS | No gateway package or online-payment variable was added; payment remains cashier-only. |
 
-## Required follow-up
+## Errors found and recovery
 
-Once Phase 1 creates the toolchain, record actual dependency versions and engine compatibility, run lint/typecheck/unit tests/build, and report each result. Database, E2E, Docker, Supabase, and production checks remain gated on implementation and access; see [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+1. An initial ESLint 10 + `eslint-config-next` combination emitted peer warnings because its transitive React/import/accessibility plugins only declared ESLint support through v9. The configuration was changed to the direct Next lint plugin, React Hooks plugin, and TypeScript-ESLint `8.73.0`, whose peer metadata supports ESLint 10. An audit of the earlier TypeScript-ESLint `8.56.0` tree found seven moderate advisories; upgrading to `8.73.0` removed them. A fresh `npm ci` and final audit pass with zero vulnerabilities and no peer-resolution warnings.
+2. The first Vitest setup used an `esbuild.jsx` option unsupported by Vite 8's Oxc transform and a `.ts` ESM config; the initial unit test failed during JSX import analysis. The config is now `vitest.config.mts` with Oxc automatic JSX runtime; the warning disappeared and the test, lint, and typecheck pass.
+3. Next.js normalized `tsconfig.json` from `jsx: "preserve"` to `jsx: "react-jsx"` during the successful build. This is its required React automatic runtime setting; follow-up typecheck passed.
+
+**Non-blocking note:** `npm ls --depth=0` reports Next's optional Sharp WASM support packages as extraneous at the root; `npm explain sharp` traces them to Next's optional `sharp` peer. The clean install, application build, and dependency audit pass. This is tracked in `KNOWN_ISSUES.md` for review when image uploads are implemented.
+
+## Not run / still unavailable
+
+- Supabase connectivity, migrations, and seed: not run; no credentials, schema, or migration exists yet.
+- Playwright E2E and mobile-device testing: not part of F1-T01; queued for Fase 4.
+- Docker/compose, VPS, production HTTPS, backup/restore, and deployment: not run; Docker and production access are unavailable.
+- Lighthouse/performance and full accessibility checks: not applicable to the temporary scaffold page.
+
+These results verify only the F1-T01 scaffold/toolchain. They do **not** indicate that ordering, admin, database, payment marking, cashier integration, or production deployment works.

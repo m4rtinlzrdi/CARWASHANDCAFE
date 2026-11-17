@@ -64,3 +64,7 @@ Proceed in the dependency order recorded in [WORK_QUEUE.md](WORK_QUEUE.md): esta
 6. **No online payment.** Do not add a gateway, online payment route, payment SDK, or customer account/login flow.
 
 See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for pending access and go-live inputs, and [DECISIONS.md](DECISIONS.md) for adopted defaults and open decisions.
+
+## F1-T01 follow-up (2026-11-17)
+
+The inventory above is the pre-development baseline, not the current repository state. After the owner authorized continuation with “terus bekerja,” F1-T01 added and verified a pinned Next.js/React/TypeScript/Tailwind toolchain and a clearly non-functional app scaffold. See [TEST_REPORT.md](TEST_REPORT.md) and [WORK_QUEUE.md](WORK_QUEUE.md) for versions and evidence. F1-T02 and database-dependent checks remain pending; no Supabase connection has been attempted.
