@@ -1,0 +1,8 @@
+node_modules/
+dist/
+asia-carwash-cafe.zip
+public/asia-carwash-cafe.zip
+*.log
+
+.vercel
+.env*
