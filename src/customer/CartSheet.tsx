@@ -14,7 +14,7 @@ interface Props {
   tableName: string;
   onQty: (key: string, qty: number) => void;
   onRemove: (key: string) => void;
-  onSubmit: (input: { notes: string; clientToken: string; customerName: string; paymentMethod: string }) => Promise<string | null> | string | null;
+  onSubmit: (input: { notes: string; clientToken: string; customerName: string; paymentMethod: string }) => string | null;
 }
 
 export function CartSheet({ open, onClose, lines, products, tableName, onQty, onRemove, onSubmit }: Props) {
@@ -64,8 +64,8 @@ export function CartSheet({ open, onClose, lines, products, tableName, onQty, on
     busyRef.current = true;
     setSubmitting(true);
     setError(null);
-    try {
-      const err = await onSubmit({ notes, clientToken: tokenRef.current, customerName, paymentMethod });
+    setTimeout(() => {
+      const err = onSubmit({ notes, clientToken: tokenRef.current, customerName, paymentMethod });
       if (err) {
         setError(err);
         setSubmitting(false);
@@ -74,12 +74,7 @@ export function CartSheet({ open, onClose, lines, products, tableName, onQty, on
         tokenRef.current = "";
         setNotes("");
       }
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setError(msg);
-      setSubmitting(false);
-      busyRef.current = false;
-    }
+    }, 450);
   };
 
   return (
@@ -224,7 +219,7 @@ export function CartSheet({ open, onClose, lines, products, tableName, onQty, on
             </>
           ) : (
             <>
-              <ShieldCheck size={16} /> Kirim Pesanan ke Kasir
+              <ShieldCheck size={16} /> Kirim Pesanan
             </>
           )}
         </button>

@@ -397,7 +397,7 @@ export function generateOrderNumber(orders: Order[], now = new Date()): string {
 }
 
 /** Validates cart + table, recomputes every price from the product catalogue, then persists the order. */
-export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> {
+export function placeOrder(input: CheckoutInput): CheckoutResult {
   const products = read("products");
   const tables = read("tables");
   const orders = read("orders");
@@ -448,50 +448,13 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     subtotal,
     total: subtotal,
     paymentMethod: payMethod === "QRIS" ? "QRIS" : "CASH",
-    paymentStatus: "UNPAID",
+    paymentStatus: "UNPAID", // cash is never auto-paid
     status: "PENDING",
     createdAt: now,
     updatedAt: now,
     businessDate: dateKey(now),
     clientToken: input.clientToken,
   };
-
-  // 1. Simpan ke Supabase Cloud (Tabel orders sesuai format KasirPro)
-  try {
-    const orderPayload = {
-      id: order.id,
-      customer_name: custName,
-      table_number: table.name || `Meja ${table.id}`,
-      items: items.map((it) => ({
-        id: it.productId,
-        name: it.name,
-        price: Number(it.unitPrice),
-        qty: Number(it.qty),
-      })),
-      total: Number(order.total),
-      status: "pending",
-      payment_method: payMethod,
-      notes: order.notes.trim() || null,
-    };
-
-    console.log("Mengirim payload pesanan:", orderPayload);
-
-    const { data, error } = await supabase
-      .from("orders")
-      .insert([orderPayload])
-      .select();
-
-    if (error) {
-      console.error("Error insert order ke Supabase:", error);
-      return { ok: false, error: "Gagal mengirim pesanan: " + error.message };
-    }
-
-    console.log("Pesanan berhasil masuk:", data);
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("Terjadi exception:", err);
-    return { ok: false, error: "Error: " + msg };
-  }
 
   // Deduct tracked stock and keep a movement trail
   let nextProducts = products;
@@ -517,6 +480,60 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   }
   saveToStorage("orders", [order, ...orders]);
   appendAudit("customer", "order.create", `New order at table ${table.id} · ${formatItems(items)}`, order.number);
+
+  // 1. Simpan ke Supabase Cloud (Tabel orders sesuai format KasirPro)
+  try {
+    const orderPayload = {
+      id: order.id,
+      customer_name: custName,
+      table_number: table.name || `Meja ${table.id}`,
+      items: items.map((it) => ({
+        id: it.productId,
+        name: it.name,
+        price: Number(it.unitPrice),
+        qty: Number(it.qty),
+      })),
+      total: Number(order.total),
+      status: "pending",
+      payment_method: payMethod,
+      notes: order.notes.trim() || null,
+    };
+
+    supabase
+      .from("orders")
+      .insert([orderPayload])
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Supabase insert error:", error);
+        } else {
+          console.log("Pesanan berhasil dikirim ke Supabase:", orderPayload.id);
+        }
+      });
+  } catch (e) {
+    console.warn("Gagal insert ke Supabase:", e);
+  }
+
+  // 2. Sync pesanan ke KasirPro API lokal jika ada
+  try {
+    fetch("http://localhost/KasirPro/api/incoming_order.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderNumber: order.number,
+        customerName: "Pelanggan Cafe",
+        tableName: table.name || `Meja ${table.id}`,
+        notes: order.notes,
+        paymentMethod: order.paymentMethod,
+        items: items.map((it) => ({
+          productId: it.productId,
+          name: it.name,
+          price: it.unitPrice,
+          qty: it.qty,
+          notes: it.instructions,
+        })),
+      }),
+    }).catch(() => {});
+  } catch (e) {}
 
   return { ok: true, order };
 }

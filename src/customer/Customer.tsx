@@ -80,23 +80,17 @@ export function Customer() {
     });
   };
 
-  const handleCheckout = async ({ notes, clientToken, customerName, paymentMethod }: { notes: string; clientToken: string; customerName: string; paymentMethod: string }): Promise<string | null> => {
-    try {
-      const res = await placeOrder({ table: tableId, lines, notes, clientToken, customerName, paymentMethod });
-      if (!res.ok) {
-        toast(res.error, "error");
-        return res.error;
-      }
-      setCart([]);
-      setCartOpen(false);
-      setPlaced(res.order);
-      window.scrollTo({ top: 0 });
-      return null;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      toast(msg, "error");
-      return msg;
+  const handleCheckout = ({ notes, clientToken, customerName, paymentMethod }: { notes: string; clientToken: string; customerName: string; paymentMethod: string }): string | null => {
+    const res = placeOrder({ table: tableId, lines, notes, clientToken, customerName, paymentMethod });
+    if (!res.ok) {
+      toast(res.error, "error");
+      return res.error;
     }
+    setCart([]);
+    setCartOpen(false);
+    setPlaced(res.order);
+    window.scrollTo({ top: 0 });
+    return null;
   };
 
   const visible = products.filter((p) => {
