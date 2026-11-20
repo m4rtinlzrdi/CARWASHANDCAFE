@@ -484,7 +484,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   // 1. Simpan ke Supabase Cloud (Tabel orders sesuai format KasirPro)
   try {
     const orderPayload = {
-      id: order.id,
+      id: order.number, // Gunakan order.number (misal ASIA-261120-001) sebagai ID utama agar sinkron dengan kasir
       customer_name: custName,
       table_number: table.name || `Meja ${table.id}`,
       items: items.map((it) => ({

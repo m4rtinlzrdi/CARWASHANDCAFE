@@ -63,27 +63,26 @@ export function OrderSuccess({ order: initial, tableName, onBack }: { order: Ord
         const { data } = await supabase
           .from("orders")
           .select("*")
-          .eq("order_number", order.number)
+          .or(`id.eq.${order.number},id.eq.${order.id}`)
           .single();
 
         if (data) {
-          applyStatus(data.status, data.payment_status === "PAID");
+          applyStatus(data.status, data.payment_status === "PAID" || data.status === "selesai");
         }
       } catch (e) {
-        // Fallback ke local KasirPro jika ada
         checkKasirProLocal();
       }
     };
 
     const applyStatus = (rawSt: string, isPaid: boolean) => {
       let s: OrderStatus = "PENDING";
-      const st = (rawSt || "").toLowerCase();
-      if (st === "pending" || st === "menunggu") s = "PENDING";
-      else if (st === "confirmed" || st === "dikonfirmasi") s = "CONFIRMED";
-      else if (st === "diproses" || st === "processing" || st === "preparing") s = "PREPARING";
-      else if (st === "ready" || st === "siap" || st === "siap ambil") s = "READY";
+      const st = (rawSt || "").toLowerCase().trim();
+      if (st === "pending" || st === "menunggu" || st === "diterima") s = "PENDING";
+      else if (st === "confirmed" || st === "dikonfirmasi" || st === "konfirmasi") s = "CONFIRMED";
+      else if (st === "diproses" || st === "processing" || st === "preparing" || st === "proses") s = "PREPARING";
+      else if (st === "ready" || st === "siap" || st === "siap ambil" || st === "siap diambil") s = "READY";
       else if (st === "selesai" || st === "completed" || st === "paid") s = "COMPLETED";
-      else if (st === "dibatalkan" || st === "cancelled") s = "CANCELLED";
+      else if (st === "dibatalkan" || st === "cancelled" || st === "ditolak") s = "CANCELLED";
 
       if (s === "READY" && remoteStatus !== "READY") {
         playAlert();
@@ -119,21 +118,22 @@ export function OrderSuccess({ order: initial, tableName, onBack }: { order: Ord
 
     loadInitialStatus();
 
-    // 2. Langganan Supabase Realtime Channel (Websocket update instan saat kasir ubah status)
+    // 2. Langganan Supabase Realtime Channel
     const channel = supabase
-      .channel(`order-${order.number}`)
+      .channel(`order-channel-${order.number}`)
       .on(
         "postgres_changes",
         {
           event: "UPDATE",
           schema: "public",
           table: "orders",
-          filter: `order_number=eq.${order.number}`,
         },
         (payload) => {
           if (payload.new) {
-            const next = payload.new as { status: string; payment_status: string };
-            applyStatus(next.status, next.payment_status === "PAID");
+            const next = payload.new as { id: string; status: string; payment_status?: string };
+            if (next.id === order.number || next.id === order.id) {
+              applyStatus(next.status, next.payment_status === "PAID" || next.status === "selesai");
+            }
           }
         }
       )
