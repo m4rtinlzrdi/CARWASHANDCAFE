@@ -80,8 +80,8 @@ export function Customer() {
     });
   };
 
-  const handleCheckout = ({ notes, clientToken, customerName, paymentMethod }: { notes: string; clientToken: string; customerName: string; paymentMethod: string }): string | null => {
-    const res = placeOrder({ table: tableId, lines, notes, clientToken, customerName, paymentMethod });
+  const handleCheckout = async ({ notes, clientToken, customerName, paymentMethod }: { notes: string; clientToken: string; customerName: string; paymentMethod: string }): Promise<string | null> => {
+    const res = await placeOrder({ table: tableId, lines, notes, clientToken, customerName, paymentMethod });
     if (!res.ok) {
       toast(res.error, "error");
       return res.error;

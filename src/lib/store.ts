@@ -397,7 +397,7 @@ export function generateOrderNumber(orders: Order[], now = new Date()): string {
 }
 
 /** Validates cart + table, recomputes every price from the product catalogue, then persists the order. */
-export function placeOrder(input: CheckoutInput): CheckoutResult {
+export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> {
   const products = read("products");
   const tables = read("tables");
   const orders = read("orders");
@@ -499,18 +499,23 @@ export function placeOrder(input: CheckoutInput): CheckoutResult {
       notes: order.notes.trim() || null,
     };
 
-    supabase
+    console.log("Mengirim payload pesanan ke Supabase:", orderPayload);
+
+    const { data, error } = await supabase
       .from("orders")
       .insert([orderPayload])
-      .then(({ data, error }) => {
-        if (error) {
-          console.error("Supabase insert error:", error);
-        } else {
-          console.log("Pesanan berhasil dikirim ke Supabase:", orderPayload.id);
-        }
-      });
-  } catch (e) {
-    console.warn("Gagal insert ke Supabase:", e);
+      .select();
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return { ok: false, error: "Gagal kirim ke kasir: " + error.message };
+    }
+
+    console.log("Pesanan berhasil masuk Supabase:", data);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Gagal insert ke Supabase:", err);
+    return { ok: false, error: "Gagal koneksi ke server kasir: " + msg };
   }
 
   // 2. Sync pesanan ke KasirPro API lokal jika ada
